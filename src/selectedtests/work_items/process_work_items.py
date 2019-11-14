@@ -8,7 +8,7 @@ from evergreen.api import EvergreenApi
 from pymongo import IndexModel, ASCENDING
 from pymongo.collection import Collection
 from selectedtests.datasource.mongo_wrapper import MongoWrapper
-from selectedtests.test_mappings.mappings import generate_test_mappings
+from selectedtests.test_mappings.create_mappings import generate_test_mappings
 from selectedtests.work_items.project_test_mapping_work_item import ProjectTestMappingWorkItem
 
 LOGGER = structlog.get_logger()
