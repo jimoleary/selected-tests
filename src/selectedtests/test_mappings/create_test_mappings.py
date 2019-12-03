@@ -1,6 +1,7 @@
 """Test Mappings class to create test mappings."""
 import structlog
 import os.path
+import re
 
 from datetime import datetime
 from collections import defaultdict
@@ -166,11 +167,11 @@ class TestMappings(object):
     def create_mappings(
         cls,
         repo: Repo,
-        source_re: Pattern,
-        test_re: Pattern,
         after_date: datetime,
-        project: str,
-        branch: str,
+        source_re: Pattern = re.compile(".*source"),
+        test_re: Pattern = re.compile(".*test"),
+        project: str = "my_project",
+        branch: str = "master",
     ):
         """
         Create the test mappings for a git repo.
@@ -235,7 +236,6 @@ class TestMappings(object):
             test_mapping = {
                 "source_file": source_file,
                 "project": self._project,
-                "repo": self._repo_name,
                 "branch": self._branch,
                 "source_file_seen_count": self._file_count_map[source_file],
                 "test_files": test_files,
