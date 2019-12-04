@@ -9,7 +9,8 @@ from datetime import datetime, time, timedelta
 import selectedtests.test_mappings.create_test_mappings as under_test
 
 
-def test_files_changed_within_range():
+@pytest.fixture(scope="function")
+def repo_with_files_added_two_days_ago(monkeypatch):
     two_days_ago = str(datetime.combine(datetime.now() - timedelta(days=2), time()))
     os.environ["GIT_AUTHOR_DATE"] = two_days_ago
     os.environ["GIT_COMMITTER_DATE"] = two_days_ago
@@ -24,11 +25,15 @@ def test_files_changed_within_range():
     repo.index.add([source_file, test_file])
     repo.index.commit("add source and test file in same commit 2 days ago")
 
+    return repo
+
+
+def test_files_changed_within_range(repo_with_files_added_two_days_ago):
     three_days_ago = datetime.combine(datetime.now() - timedelta(days=3), time()).replace(
         tzinfo=pytz.UTC
     )
     test_mappings = under_test.TestMappings.create_mappings(
-        repo=repo, after_date=three_days_ago
+        repo=repo_with_files_added_two_days_ago, after_date=three_days_ago
     )
     test_mappings_list = test_mappings.get_mappings()
 
@@ -41,3 +46,14 @@ def test_files_changed_within_range():
             "test_files": [{"name": "new-test-file", "test_file_seen_count": 1}],
         }
     ]
+
+
+def test_files_changed_outside_range(repo_with_files_added_two_days_ago):
+    one_day_ago = datetime.combine(datetime.now() - timedelta(days=1), time()).replace(
+        tzinfo=pytz.UTC
+    )
+    test_mappings = under_test.TestMappings.create_mappings(
+        repo=repo_with_files_added_two_days_ago, after_date=one_day_ago
+    )
+    test_mappings_list = test_mappings.get_mappings()
+    assert len(test_mappings_list) == 0
