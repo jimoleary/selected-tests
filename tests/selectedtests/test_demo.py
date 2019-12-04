@@ -10,16 +10,15 @@ import selectedtests.test_mappings.create_test_mappings as under_test
 
 
 @pytest.fixture
-def repo_with_files_added_two_days_ago(monkeypatch):
+def repo_with_files_added_two_days_ago(monkeypatch, tmpdir):
     two_days_ago = str(datetime.combine(datetime.now() - timedelta(days=2), time()))
     monkeypatch.setenv("GIT_AUTHOR_DATE", two_days_ago)
     monkeypatch.setenv("GIT_COMMITTER_DATE", two_days_ago)
 
-    current_directory = os.path.dirname(os.path.abspath(__file__))
-    repo = git.Repo.init(current_directory)
+    repo = git.Repo.init(tmpdir)
     repo.index.commit("initial commit -- no files changed")
-    source_file = os.path.join(current_directory, "new-source-file")
-    test_file = os.path.join(current_directory, "new-test-file")
+    source_file = os.path.join(tmpdir, "new-source-file")
+    test_file = os.path.join(tmpdir, "new-test-file")
     open(source_file, "wb").close()
     open(test_file, "wb").close()
     repo.index.add([source_file, test_file])
